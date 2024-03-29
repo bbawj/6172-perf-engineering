@@ -1,4 +1,4 @@
-/** 
+/**
  * LineDemo.c -- main driver for the line simulation
  * Copyright (c) 2012 the Massachusetts Institute of Technology
  *
@@ -23,22 +23,24 @@
 
 #include "./line_demo.h"
 
-#include <time.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "./graphic_stuff.h"
 #include "./line.h"
+#include "collision_world.h"
+#include "vec.h"
 
-static char* LineDemo_input_file_path;
+static char *LineDemo_input_file_path;
 
-void LineDemo_setInputFile(char* input_file_path) {
+void LineDemo_setInputFile(char *input_file_path) {
   LineDemo_input_file_path = input_file_path;
 }
 
-LineDemo* LineDemo_new() {
-  LineDemo* lineDemo = malloc(sizeof(LineDemo));
+LineDemo *LineDemo_new() {
+  LineDemo *lineDemo = malloc(sizeof(LineDemo));
   if (lineDemo == NULL) {
     return NULL;
   }
@@ -49,13 +51,13 @@ LineDemo* LineDemo_new() {
   return lineDemo;
 }
 
-void LineDemo_delete(LineDemo* lineDemo) {
+void LineDemo_delete(LineDemo *lineDemo) {
   CollisionWorld_delete(lineDemo->collisionWorld);
   free(lineDemo);
 }
 
 // Read in lines from line.in and add them into collision world for simulation.
-void LineDemo_createLines(LineDemo* lineDemo) {
+void LineDemo_createLines(LineDemo *lineDemo) {
   unsigned int lineId = 0;
   unsigned int numOfLines;
   window_dimension px1;
@@ -75,20 +77,28 @@ void LineDemo_createLines(LineDemo* lineDemo) {
   fscanf(fin, "%d\n", &numOfLines);
   lineDemo->collisionWorld = CollisionWorld_new(numOfLines);
 
-  while (EOF
-      != fscanf(fin, "(%lf, %lf), (%lf, %lf), %lf, %lf, %d\n", &px1, &py1, &px2,
-                &py2, &vx, &vy, &isGray)) {
+  while (EOF != fscanf(fin, "(%lf, %lf), (%lf, %lf), %lf, %lf, %d\n", &px1,
+                       &py1, &px2, &py2, &vx, &vy, &isGray)) {
     Line *line = malloc(sizeof(Line));
 
     // convert window coordinates to box coordinates
     windowToBox(&line->p1.x, &line->p1.y, px1, py1);
     windowToBox(&line->p2.x, &line->p2.y, px2, py2);
 
+    line->length = Vec_length(Vec_subtract(line->p1, line->p2));
+
     // convert window velocity to box velocity
     velocityWindowToBox(&line->velocity.x, &line->velocity.y, vx, vy);
 
+    line->p3 =
+        Vec_add(line->p1, Vec_multiply(line->velocity,
+                                       lineDemo->collisionWorld->timeStep));
+    line->p4 =
+        Vec_add(line->p2, Vec_multiply(line->velocity,
+                                       lineDemo->collisionWorld->timeStep));
+
     // store color
-    line->color = (Color) isGray;
+    line->color = (Color)isGray;
 
     // store line ID
     line->id = lineId;
@@ -100,34 +110,32 @@ void LineDemo_createLines(LineDemo* lineDemo) {
   fclose(fin);
 }
 
-void LineDemo_setNumFrames(LineDemo* lineDemo, const unsigned int numFrames) {
+void LineDemo_setNumFrames(LineDemo *lineDemo, const unsigned int numFrames) {
   lineDemo->numFrames = numFrames;
 }
 
-void LineDemo_initLine(LineDemo* lineDemo) {
-  LineDemo_createLines(lineDemo);
-}
+void LineDemo_initLine(LineDemo *lineDemo) { LineDemo_createLines(lineDemo); }
 
-Line* LineDemo_getLine(LineDemo* lineDemo, const unsigned int index) {
+Line *LineDemo_getLine(LineDemo *lineDemo, const unsigned int index) {
   return CollisionWorld_getLine(lineDemo->collisionWorld, index);
 }
 
-unsigned int LineDemo_getNumOfLines(LineDemo* lineDemo) {
+unsigned int LineDemo_getNumOfLines(LineDemo *lineDemo) {
   return CollisionWorld_getNumOfLines(lineDemo->collisionWorld);
 }
 
-unsigned int LineDemo_getNumLineWallCollisions(LineDemo* lineDemo) {
+unsigned int LineDemo_getNumLineWallCollisions(LineDemo *lineDemo) {
   return CollisionWorld_getNumLineWallCollisions(lineDemo->collisionWorld);
 }
 
-unsigned int LineDemo_getNumLineLineCollisions(LineDemo* lineDemo) {
+unsigned int LineDemo_getNumLineLineCollisions(LineDemo *lineDemo) {
   return CollisionWorld_getNumLineLineCollisions(lineDemo->collisionWorld);
 }
 
 // The main simulation loop
-bool LineDemo_update(LineDemo* lineDemo) {
+bool LineDemo_update(LineDemo *lineDemo, QuadTree *q) {
   lineDemo->count++;
-  CollisionWorld_updateLines(lineDemo->collisionWorld);
+  CollisionWorld_updateLines(lineDemo->collisionWorld, q);
   if (lineDemo->count > lineDemo->numFrames) {
     return false;
   }

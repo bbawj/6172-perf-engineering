@@ -20,30 +20,30 @@
  * SOFTWARE.
  **/
 
+#include <cilk/cilk.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <cilk/cilk.h>
 
-
+#include "./cilktool.h"
 #include "./fasttime.h"
 #include "./line.h"
 #include "./line_demo.h"
-#include "./cilktool.h"
 
 // The PROFILE_BUILD preprocessor define is used to indicate we are building for
 // profiling, so don't include any graphics or Cilk functions.
 #ifndef PROFILE_BUILD
 #include "./graphic_stuff.h"
 #endif
-static char* DEFAULT_INPUT_FILE_PATH = "input/mit.in";
-static char* input_file_path;
+static char *DEFAULT_INPUT_FILE_PATH = "input/mit.in";
+static char *input_file_path;
 
 // For non-graphic version
 void lineMain(LineDemo *lineDemo) {
+  QuadTree gQuadTree = build_quadtree(lineDemo->collisionWorld);
   // Loop for updating line movement simulation
   while (true) {
-    if (!LineDemo_update(lineDemo)) {
+    if (!LineDemo_update(lineDemo, &gQuadTree)) {
       break;
     }
   }
@@ -60,14 +60,14 @@ int main(int argc, char *argv[]) {
   // Process command line options.
   while ((optchar = getopt(argc, argv, "gi")) != -1) {
     switch (optchar) {
-      case 'g':
+    case 'g':
 #ifndef PROFILE_BUILD
-        graphicDemoFlag = true;
+      graphicDemoFlag = true;
 #endif
-        break;
-      default:
-        printf("Ignoring unrecognized option: %c\n", optchar);
-        continue;
+      break;
+    default:
+      printf("Ignoring unrecognized option: %c\n", optchar);
+      continue;
     }
   }
 
@@ -117,8 +117,7 @@ int main(int argc, char *argv[]) {
 
   // Output results.
   printf("---- RESULTS ----\n");
-  printf("Elapsed execution time: %fs\n",
-         tdiff(start_time, end_time));
+  printf("Elapsed execution time: %fs\n", tdiff(start_time, end_time));
   printf("%u Line-Wall Collisions\n",
          LineDemo_getNumLineWallCollisions(lineDemo));
   printf("%u Line-Line Collisions\n",

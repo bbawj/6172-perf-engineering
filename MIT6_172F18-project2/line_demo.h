@@ -24,8 +24,8 @@
 #ifndef LINEDEMO_H_
 #define LINEDEMO_H_
 
-#include "./line.h"
 #include "./collision_world.h"
+#include "./line.h"
 
 struct LineDemo {
   // Iteration counter
@@ -35,37 +35,37 @@ struct LineDemo {
   unsigned int numFrames;
 
   // Objects for line simulation
-  CollisionWorld* collisionWorld;
+  CollisionWorld *collisionWorld;
 };
 typedef struct LineDemo LineDemo;
 
-LineDemo* LineDemo_new();
-void LineDemo_delete(LineDemo* lineDemo);
+LineDemo *LineDemo_new();
+void LineDemo_delete(LineDemo *lineDemo);
 
 // Add lines for line simulation at beginning.
-void LineDemo_createLines(LineDemo* lineDemo);
+void LineDemo_createLines(LineDemo *lineDemo);
 
 // Set number of frames to compute.
-void LineDemo_setNumFrames(LineDemo* lineDemo, const unsigned int numFrames);
+void LineDemo_setNumFrames(LineDemo *lineDemo, const unsigned int numFrames);
 
 // Initialize line simulation.
-void LineDemo_initLine(LineDemo* lineDemo);
+void LineDemo_initLine(LineDemo *lineDemo);
 
 // Get ith line.
-Line* LineDemo_getLine(LineDemo* lineDemo, const unsigned int index);
+Line *LineDemo_getLine(LineDemo *lineDemo, const unsigned int index);
 
 // Get num of lines.
-unsigned int LineDemo_getNumOfLines(LineDemo* lineDemo);
+unsigned int LineDemo_getNumOfLines(LineDemo *lineDemo);
 
 // Get number of line-wall collisions.
-unsigned int LineDemo_getNumLineWallCollisions(LineDemo* lineDemo);
+unsigned int LineDemo_getNumLineWallCollisions(LineDemo *lineDemo);
 
 // Get number of line-line collisions.
-unsigned int LineDemo_getNumLineLineCollisions(LineDemo* lineDemo);
+unsigned int LineDemo_getNumLineLineCollisions(LineDemo *lineDemo);
 
 // Line simulation update function.
-bool LineDemo_update(LineDemo* lineDemo);
+bool LineDemo_update(LineDemo *lineDemo, QuadTree *q);
 
-void LineDemo_setInputFile(char* input_file_path);
+void LineDemo_setInputFile(char *input_file_path);
 
-#endif  // LINEDEMO_H_
+#endif // LINEDEMO_H_

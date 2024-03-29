@@ -20,6 +20,7 @@
  * SOFTWARE.
  **/
 
+#define QUADTREE
 #include "./intersection_detection.h"
 
 #include <assert.h>
@@ -31,15 +32,13 @@
 IntersectionType intersect(Line *l1, Line *l2, double time) {
   assert(compareLines(l1, l2) < 0);
 
-  Vec velocity;
   Vec p1;
   Vec p2;
   Vec v1 = Vec_makeFromLine(*l1);
   Vec v2 = Vec_makeFromLine(*l2);
 
   // Get relative velocity.
-  velocity = Vec_subtract(l2->velocity, l1->velocity);
-
+  Vec velocity = Vec_subtract(l2->velocity, l1->velocity);
   // Get the parallelogram.
   p1 = Vec_add(l2->p1, Vec_multiply(velocity, time));
   p2 = Vec_add(l2->p2, Vec_multiply(velocity, time));
@@ -67,8 +66,8 @@ IntersectionType intersect(Line *l1, Line *l2, double time) {
     return L2_WITH_L1;
   }
 
-  if (pointInParallelogram(l1->p1, l2->p1, l2->p2, p1, p2)
-      && pointInParallelogram(l1->p2, l2->p1, l2->p2, p1, p2)) {
+  if (pointInParallelogram(l1->p1, l2->p1, l2->p2, p1, p2) &&
+      pointInParallelogram(l1->p2, l2->p1, l2->p2, p1, p2)) {
     return L1_WITH_L2;
   }
 
@@ -104,8 +103,8 @@ bool pointInParallelogram(Vec point, Vec p1, Vec p2, Vec p3, Vec p4) {
   double d3 = direction(p1, p3, point);
   double d4 = direction(p2, p4, point);
 
-  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0))
-      && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
+  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+      ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
     return true;
   }
   return false;
@@ -121,8 +120,8 @@ bool intersectLines(Vec p1, Vec p2, Vec p3, Vec p4) {
 
   // If (p1, p2) and (p3, p4) straddle each other, the line segments must
   // intersect.
-  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0))
-      && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
+  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+      ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
     return true;
   }
   if (d1 == 0 && onSegment(p3, p4, p1)) {
@@ -144,8 +143,8 @@ bool intersectLines(Vec p1, Vec p2, Vec p3, Vec p4) {
 Vec getIntersectionPoint(Vec p1, Vec p2, Vec p3, Vec p4) {
   double u;
 
-  u = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x))
-      / ((p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y));
+  u = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) /
+      ((p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y));
 
   return Vec_add(p1, Vec_multiply(Vec_subtract(p2, p1), u));
 }
@@ -158,8 +157,8 @@ double direction(Vec pi, Vec pj, Vec pk) {
 // Check if a point pk is in the line segment (pi, pj).
 // pi, pj, and pk must be collinear.
 bool onSegment(Vec pi, Vec pj, Vec pk) {
-  if (((pi.x <= pk.x && pk.x <= pj.x) || (pj.x <= pk.x && pk.x <= pi.x))
-      && ((pi.y <= pk.y && pk.y <= pj.y) || (pj.y <= pk.y && pk.y <= pi.y))) {
+  if (((pi.x <= pk.x && pk.x <= pj.x) || (pj.x <= pk.x && pk.x <= pi.x)) &&
+      ((pi.y <= pk.y && pk.y <= pj.y) || (pj.y <= pk.y && pk.y <= pi.y))) {
     return true;
   }
   return false;
@@ -169,4 +168,3 @@ bool onSegment(Vec pi, Vec pj, Vec pk) {
 double crossProduct(double x1, double y1, double x2, double y2) {
   return x1 * y2 - x2 * y1;
 }
-

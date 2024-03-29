@@ -26,6 +26,7 @@
 
 #include "./intersection_detection.h"
 #include "./line.h"
+#include <cilk/cilk.h>
 
 struct CollisionWorld {
   // Time step used for simulation
@@ -35,12 +36,6 @@ struct CollisionWorld {
   // This CollisionWorld owns the Line* lines.
   Line **lines;
   unsigned int numOfLines;
-
-  // Record the total number of line-wall collisions.
-  unsigned int numLineWallCollisions;
-
-  // Record the total number of line-line intersections.
-  unsigned int numLineLineCollisions;
 };
 typedef struct CollisionWorld CollisionWorld;
 
@@ -60,7 +55,7 @@ Line *CollisionWorld_getLine(CollisionWorld *collisionWorld,
                              const unsigned int index);
 
 // Update lines' situation in the box.
-void CollisionWorld_updateLines(CollisionWorld *collisionWorld);
+void CollisionWorld_updateLines(CollisionWorld *collisionWorld, QuadTree *q);
 
 // Update position of lines.
 void CollisionWorld_updatePosition(CollisionWorld *collisionWorld);
@@ -70,7 +65,8 @@ void CollisionWorld_lineWallCollision(CollisionWorld *collisionWorld);
 
 // Detect line-line intersection.
 void CollisionWorld_detectIntersection(CollisionWorld *collisionWorld);
-void CollisionWorld_detectIntersection_new(CollisionWorld *collisionWorld);
+void CollisionWorld_detectIntersection_new(CollisionWorld *collisionWorld,
+                                           QuadTree *q);
 
 // Get total number of line-wall collisions.
 unsigned int
@@ -86,4 +82,5 @@ void CollisionWorld_collisionSolver(CollisionWorld *collisionWorld, Line *l1,
                                     Line *l2,
                                     IntersectionType intersectionType);
 
+QuadTree build_quadtree(CollisionWorld *collisionWorld);
 #endif // COLLISIONWORLD_H_

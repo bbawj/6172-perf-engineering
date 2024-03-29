@@ -59,13 +59,16 @@ typedef struct Node {
   struct Node *parent;
   Vec bl, tl, br, tr;
   Lines *lines;
-  bool tested;
 } Node;
 
 // A two-dimensional line.
 struct Line {
   Vec p1; // One endpoint of the line.
   Vec p2; // The other endpoint of the line.
+  Vec p3; // One endpoint of the line.
+  Vec p4; // The other endpoint of the line.
+
+  vec_dimension length;
 
   // The line's current velocity, in units of pixels per time step.
   Vec velocity;
@@ -140,8 +143,6 @@ static inline void deinit_lines(Lines *l) {
   if (l->lines != NULL) {
     free(l->lines);
   }
-  l->cap = 0;
-  l->len = 0;
   free(l);
 }
 
